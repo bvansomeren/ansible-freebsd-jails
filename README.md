@@ -30,24 +30,28 @@ zfs snapshot zroot/jails/releases/11.0-RELEASE@latest
 
 Role Variables
 --------------
+
+```
 freebsd_jails_location:             "/usr/local/jails"
 freebsd_jails_dataset:              "zroot/jails"
 freebsd_jails_template_dataset:     "zroot/jails/templates"
-
+```
+```
 freebsd_jails: []
+```
 
 A valid freebsd_jails should look like
-
+```
 freebsd_jails:
 - name: newjail
   hostname: newjail.local.domain
   extra_opts:
   - name: exec.start
     option: ""
-
-
+```
+```
 freebsd_jails_action:               "create,start"
-
+```
 allows finer grained control on what action to execute
 The default create,start are harmless to containers not listed and running containers in general
 create executes create actions
