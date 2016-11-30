@@ -1,0 +1,76 @@
+---
+# tasks file for bvansomeren.freebsd-jails
+#
+- name: ensure jails dataset is present
+  zfs: 
+    name: "{{ freebsd_jails_dataset }}" 
+    state: present 
+    mountpoint: "{{ freebsd_jails_location }}" 
+
+- name: ensure jail.conf contains global settings
+  blockinfile:
+    dest: /etc/jail.conf
+    create: yes
+    marker: "# {mark} Global settings applied to all jails."
+    content: |
+        {% for opt in freebsd_jails_default_opts %}
+        {{ opt.name }}{% if opt.option is defined %} = "{{ opt.option }}"{% endif %};
+        {% endfor %}
+  when: "{{ freebsd_jails_set_globals }}"
+
+- name: ensure jail.conf contains jail stanzas
+  blockinfile:
+    dest: /etc/jail.conf
+    create: yes
+    marker: "# {mark} Jail {{ item.name }}"
+    content: |
+      {{ item.name }} {
+        host.hostname = {{ item.hostname }};
+      {% if item.extra_opts is defined %}{% for opt in item.extra_opts %}  {{ opt.name }}{% if opt.option is defined %} = {{ opt.option }}{% endif %};
+      {% endfor %}
+      {% endif %}
+      }
+  with_items: "{{ freebsd_jails }}"
+  when: '"create" in freebsd_jails_action'
+
+- name: ensure filesystems are cloned
+  command: zfs clone -p "{{ freebsd_jails_template_dataset }}/{{ freebsd_jails_template_name }}@{{ freebsd_jails_template_snapshot }}" "{{ freebsd_jails_dataset }}/{{ item.name }}" creates="{{ freebsd_jails_location }}/{{ item.name }}"
+  with_items: "{{ freebsd_jails }}"
+  when: '"create" in freebsd_jails_action'
+
+- name: optionally ensure jails receive further rc.conf changes
+  command: sysrc -f {{ freebsd_jails_location }}/{{ item.name }}/etc/rc.conf {% for rc in freebsd_jails_rc_defaults %} {{rc.name}}={{rc.value}}{% endfor %} creates={{ freebsd_jails_location }}/{{ item.name }}/etc/rc.conf
+  with_items: "{{ freebsd_jails }}"
+  when: '"create" in freebsd_jails_action and freebsd_jails_rc_defaults is defined'
+
+- name: ensure jails rc.conf hostname using sysrc
+  command: sysrc -f {{ freebsd_jails_location }}/{{ item.name }}/etc/rc.conf hostname={{ item.hostname }}
+  with_items: "{{ freebsd_jails }}"
+  when: '"create" in freebsd_jails_action'
+
+- name: ensure jails are started
+  command: jail -cm {{ item.name }}
+  with_items: "{{ freebsd_jails }}"
+  when: '"start" in freebsd_jails_action'
+
+- name: ensure jails destroyed
+  command: jail -r {{ item.name }}
+  with_items: "{{ freebsd_jails }}"
+  when: '"destroy" in freebsd_jails_action or "stop" in freebsd_jails_action'
+  ignore_errors: yes
+
+- name: ensure datasets are removed for destroyed jails
+  zfs:
+    name: "{{ freebsd_jails_dataset }}/{{ item.name }}"
+    state: absent
+  with_items: "{{ freebsd_jails }}"
+  when: '"destroy" in freebsd_jails_action'
+
+- name: ensure configuration stanzas are removed on destroy
+  blockinfile:
+    dest: /etc/jail.conf
+    marker: "# {mark} Jail {{ item.name }}"
+    state: absent
+  with_items: "{{ freebsd_jails }}"
+  when: '"destroy" in freebsd_jails_action'
+
