@@ -1,13 +1,13 @@
 bvansomeren.jails
 =================
 
-Creates jails based on previously created jail templates (for example bvansomeren.freebsd-jail-template)
-The role doesn't use any extra utilities or scripts and just relies on ZFS and jail.conf(5)
-Extra packages can be installed from the host as required, further configuration should be done using Ansible into the created jail (TODO: Add examples)
+Creates jails based on previously created jail templates (for example bvansomeren.freebsd-jail-template)  
+The role doesn't use any extra utilities or scripts and just relies on ZFS and jail.conf(5)  
+Extra packages can be installed from the host as required, further configuration should be done using Ansible into the created jail (TODO: Add examples)  
 
-This role makes extensive use of the /etc/jail.conf file. In general at least one invocation of this role should set "freebsd\_jails\_set\_globals" to ensure the global variables are set at least once.
-Because this role uses ansible blockinfile it will only change the blocks in the configuration, leaving the other ones alone.
-The idea is that you can have many playbooks which invoke their own jails to the same host without collision (except of course on name, IP and locations)
+This role makes extensive use of the /etc/jail.conf file. In general at least one invocation of this role should set "freebsd\_jails\_set\_globals" to ensure the global variables are set at least once.  
+Because this role uses ansible blockinfile it will only change the blocks in the configuration, leaving the other ones alone.  
+The idea is that you can have many playbooks which invoke their own jails to the same host without collision (except of course on name, IP and locations)  
 
 Requirements
 ------------
@@ -52,17 +52,17 @@ freebsd_jails:
 ```
 freebsd_jails_action:               "create,start"
 ```
-allows finer grained control on what action to execute
-The default create,start are harmless to containers not listed and running containers in general
-create executes create actions
-start starts the jails that are configured
-stop stops the jails that are configured
-destroy destroys the configured jails
+allows finer grained control on what action to execute  
+The default create,start are harmless to containers not listed and running containers in general  
+create executes create actions  
+start starts the jails that are configured  
+stop stops the jails that are configured  
+destroy destroys the configured jails  
 
 Dependencies
 ------------
 
-No hard dependencies other than obviously FreeBSD (and less obviously ZFS. Design choice)
+No hard dependencies other than obviously FreeBSD (and less obviously ZFS. Design choice)  
 Could be useful to build the templates using bvansomeren.freebsd-jails-template
 This was only tested on FreeBSD 11, but might work on 10
 
