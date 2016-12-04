@@ -34,7 +34,7 @@
   when: '"create" in freebsd_jails_action'
 
 - name: ensure filesystems are cloned
-  command: zfs clone -p "{{ freebsd_jails_template_dataset }}/{{ freebsd_jails_template_name }}@{{ freebsd_jails_template_snapshot }}" "{{ freebsd_jails_dataset }}/{{ item.name }}" creates="{{ freebsd_jails_location }}/{{ item.name }}"
+  shell: zfs clone -p "$(zfs list -r -H -t snapshot -o name -S creation {{ freebsd_jails_template_dataset }}/{{ freebsd_jails_template_name }} | head -n1)" "{{ freebsd_jails_dataset }}/{{ item.name }}" creates="{{ freebsd_jails_location }}/{{ item.name }}"
   with_items: "{{ freebsd_jails }}"
   when: '"create" in freebsd_jails_action'
 
