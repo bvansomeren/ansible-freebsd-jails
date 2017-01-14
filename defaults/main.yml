@@ -43,6 +43,7 @@ freebsd_jails_default_opts:
   option: "{{ freebsd_jails_location }}/$name"
 - name: exec.clean
 - name: mount.devfs
+- name: persist
 - name: interface
   option: "em0"
 

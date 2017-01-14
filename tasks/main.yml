@@ -11,6 +11,7 @@
   blockinfile:
     dest: /etc/jail.conf
     create: yes
+    insertbefore: BOF
     marker: "# {mark} Global settings applied to all jails."
     content: |
         {% for opt in freebsd_jails_default_opts %}
