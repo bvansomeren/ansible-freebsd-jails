@@ -61,9 +61,7 @@
   ignore_errors: yes
 
 - name: ensure datasets are removed for destroyed jails
-  zfs:
-    name: "{{ freebsd_jails_dataset }}/{{ item.name }}"
-    state: absent
+  shell: zfs list "{{ freebsd_jails_dataset }}/{{ item.name }}" && zfs destroy -f "{{ freebsd_jails_dataset }}/{{ item.name }}" || echo "dataset already gone"
   with_items: "{{ freebsd_jails }}"
   when: '"destroy" in freebsd_jails_action'
 
