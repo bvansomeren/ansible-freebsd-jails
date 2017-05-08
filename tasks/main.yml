@@ -17,7 +17,7 @@
         {% for opt in freebsd_jails_default_opts %}
         {{ opt.name }}{% if opt.option is defined %} = "{{ opt.option }}"{% endif %};
         {% endfor %}
-  when: "{{ freebsd_jails_set_globals }}"
+  when: freebsd_jails_set_globals
 
 - name: ensure jail.conf contains jail stanzas
   blockinfile:
